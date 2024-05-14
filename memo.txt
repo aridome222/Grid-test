@@ -1,0 +1,5 @@
+# クラッシュした場合下記のコマンドを実行
+docker exec grid-test-ブラウザ名-1 curl -X 
+DELETE http://selenium-hub:4444/session/セッションID
+例：docker exec grid-test-firefox-1 curl -X 
+DELETE http://selenium-hub:4444/session/3073df79-7687-42b7-904e-f3cca4c84aa6

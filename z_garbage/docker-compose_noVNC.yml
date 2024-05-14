@@ -5,36 +5,45 @@ services:
     shm_size: 2gb
     depends_on:
       - selenium-hub
+    ports:
+      - "5900:5900"  # VNCサーバーのポートを公開
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+      - START_XVFB=false  # noVNCを使用するためにXvfbを無効化
 
   edge:
     image: selenium/node-edge:4.1.4-20220427
     shm_size: 2gb
     depends_on:
       - selenium-hub
+    ports:
+      - "5901:5900"  # VNCサーバーのポートを公開
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+      - START_XVFB=false  # noVNCを使用するためにXvfbを無効化
 
   firefox:
     image: selenium/node-firefox:4.1.4-20220427
     shm_size: 2gb
     depends_on:
       - selenium-hub
+    ports:
+      - "5902:5900"  # VNCサーバーのポートを公開
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+      - START_XVFB=false  # noVNCを使用するためにXvfbを無効化
 
   selenium-hub:
     image: selenium/hub:4.1.4-20220427
@@ -43,7 +52,16 @@ services:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
-  
+
+  # noVNCサービスを追加
+  novnc:
+    image: theasp/novnc:latest
+    ports:
+      - "7900:8080"  # noVNCのポートを公開
+    environment:
+      - HUB_SERVICE_HOST=selenium-hub
+      - HUB_SERVICE_PORT=4444
+
   python-container:
     build: 
       context: ./python
