@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from concurrent import futures
 import time
 
@@ -16,13 +17,18 @@ def test(browser, session_number):
         options = webdriver.FirefoxOptions()
     elif browser == 'edge':
         options = webdriver.EdgeOptions()
+    elif browser == 'safari':
+        options = Options()
+        driver = webdriver.Remote(command_executor='http://host.docker.internal:4446/wd/hub', options=options)
     else:
         raise ValueError("Invalid browser specified")
-
-    driver = webdriver.Remote(
-        command_executor='http://selenium-hub:4444/wd/hub',
-        options=options
-    )
+    
+    # Safariの場合は上記で既にdriverが作成されているので、以下の行は不要
+    if browser != 'safari':
+        driver = webdriver.Remote(
+            command_executor='http://selenium-hub:4444/wd/hub',
+            options=options
+        )
 
     driver.get('https://www.yahoo.co.jp/')
     print(f"{browser} session {session_number}", driver.current_url)

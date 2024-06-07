@@ -1,4 +1,4 @@
-version: "3"
+# version: "3"
 services:
   chrome:
     image: selenium/node-chrome:4.1.4-20220427
