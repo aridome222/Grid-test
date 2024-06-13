@@ -1,8 +1,9 @@
 # version: "3"
 services:
   chrome:
-    image: selenium/node-chrome:4.1.4-20220427
-    shm_size: 2gb
+    platform: linux/x86_64
+    image: selenium/node-chrome:beta
+    shm_size: 4gb
     depends_on:
       - selenium-hub
     environment:
@@ -10,11 +11,12 @@ services:
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_SESSION_TIMEOUT=20 # タイムアウトを20秒に設定
 
   edge:
-    image: selenium/node-edge:4.1.4-20220427
-    shm_size: 2gb
+    platform: linux/x86_64
+    image: selenium/node-edge:beta
+    shm_size: 4gb
     depends_on:
       - selenium-hub
     environment:
@@ -22,11 +24,12 @@ services:
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_SESSION_TIMEOUT=20 # タイムアウトを20秒に設定
 
   firefox:
-    image: selenium/node-firefox:4.1.4-20220427
-    shm_size: 2gb
+    platform: linux/x86_64
+    image: selenium/node-firefox:beta
+    shm_size: 4gb
     depends_on:
       - selenium-hub
     environment:
@@ -34,10 +37,11 @@ services:
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_SESSIONS=4
-      - SE_NODE_SESSION_TIMEOUT=100 # タイムアウトを100秒に設定
+      - SE_NODE_SESSION_TIMEOUT=20 # タイムアウトを20秒に設定
 
   selenium-hub:
-    image: selenium/hub:4.1.4-20220427
+    platform: linux/x86_64
+    image: selenium/hub:latest
     container_name: selenium-hub
     ports:
       - "4442:4442"

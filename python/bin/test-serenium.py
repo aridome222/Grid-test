@@ -2,9 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from concurrent import futures
 import time
+from selenium.common.exceptions import WebDriverException
+
 
 BROWSER_NUMBER = 3
-SESSION_NUMBER = 4
+SESSION_NUMBER = 3
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
 
@@ -13,10 +15,22 @@ def test(browser, session_number):
 
     if browser == 'chrome':
         options = webdriver.ChromeOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')  # ヘッドレスモードで実行
+        # options.add_argument('--disable-gpu')  # GPU を無効にする
     elif browser == 'firefox':
         options = webdriver.FirefoxOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')  # ヘッドレスモードで実行
+        # options.add_argument('--disable-gpu')  # GPU を無効にする
     elif browser == 'edge':
         options = webdriver.EdgeOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')  # ヘッドレスモードで実行
+        # options.add_argument('--disable-gpu')  # GPU を無効にする
     elif browser == 'safari':
         options = Options()
         driver = webdriver.Remote(command_executor='http://host.docker.internal:4446/wd/hub', options=options)
@@ -30,19 +44,24 @@ def test(browser, session_number):
             options=options
         )
 
-    driver.get('https://www.yahoo.co.jp/')
-    print(f"{browser} session {session_number}", driver.current_url)
+    try:
+        driver.get('https://www.yahoo.co.jp/')
+        print(f"{browser} session {session_number}", driver.current_url)
 
-    start_time = time.time()  # テストの開始時間を記録
+        start_time = time.time()  # テストの開始時間を記録
 
-    # スクリーンショットを取って保存
-    driver.save_screenshot(screen_shot_file_path)
+        # スクリーンショットを取って保存
+        driver.save_screenshot(screen_shot_file_path)
 
-    end_time = time.time()  # テストの終了時間を記録
-    elapsed_time = end_time - start_time  # テストの実行時間を計算
-    print(f"{browser} session {session_number} Test elapsed time: {elapsed_time} seconds")
+        end_time = time.time()  # テストの終了時間を記録
+        elapsed_time = end_time - start_time  # テストの実行時間を計算
+        print(f"{browser} session {session_number} Test elapsed time: {elapsed_time} seconds")
 
-    driver.quit()
+        driver.quit()
+
+    except WebDriverException as e:
+        print(f"Error with {browser} session {session_number}: {e}")
+        elapsed_time = None
 
     return elapsed_time  # テストの実行時間を返す
 
@@ -66,6 +85,7 @@ with futures.ThreadPoolExecutor(max_workers=TOTAL_SESSION_NUMBER) as executor:
         for session_number in sessions:
             future = executor.submit(test, browser, session_number)
             future_list.append(future)
+            time.sleep(0.5)
 _ = futures.wait(fs=future_list)  # 全てのテストが完了するのを待機
 
 # 各テストの実行時間を取得
@@ -74,7 +94,7 @@ for future in future_list:
     print(f"Test elapsed time: {elapsed_time} seconds")
 
 # トータルの実行時間を計算
-total_time = sum([future.result() for future in future_list])
+total_time = sum([result for future in future_list if (result := future.result()) is not None])
 print(f"Total elapsed time: {total_time} seconds")
 
 """ END """
