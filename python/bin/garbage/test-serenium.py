@@ -5,8 +5,8 @@ import time
 from selenium.common.exceptions import WebDriverException
 
 
-BROWSER_NUMBER = 3
-SESSION_NUMBER = 3
+BROWSER_NUMBER = 4
+SESSION_NUMBER = 1
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
 
@@ -32,8 +32,10 @@ def test(browser, session_number):
         options.add_argument('--headless')  # ヘッドレスモードで実行
         # options.add_argument('--disable-gpu')  # GPU を無効にする
     elif browser == 'safari':
-        options = Options()
-        driver = webdriver.Remote(command_executor='http://host.docker.internal:4446/wd/hub', options=options)
+        #Safariドライバ起動
+        SafariDriver = webdriver.Safari()
+        # options = Options()
+        # driver = webdriver.Remote(command_executor='http://host.docker.internal:4446/wd/hub', options=options)
     else:
         raise ValueError("Invalid browser specified")
     
@@ -43,25 +45,36 @@ def test(browser, session_number):
             command_executor='http://selenium-hub:4444/wd/hub',
             options=options
         )
+    if browser == 'safari':
+        print(f"{browser} session {session_number}", )
+        SafariDriver.maximize_window()
+        time.sleep(1)
+        #susakiworks表示
+        SafariDriver.get('https://www.yahoo.co.jp/')
+        time.sleep(3)
+        # スクリーンショットを撮る
+        SafariDriver.save_screenshot('susakiworks_screenshot.png')
+        #ブラウザClose
+        SafariDriver.quit()
+    else:
+        try:
+            driver.get('https://www.yahoo.co.jp/')
+            print(f"{browser} session {session_number}", driver.current_url)
 
-    try:
-        driver.get('https://www.yahoo.co.jp/')
-        print(f"{browser} session {session_number}", driver.current_url)
+            start_time = time.time()  # テストの開始時間を記録
 
-        start_time = time.time()  # テストの開始時間を記録
+            # スクリーンショットを取って保存
+            driver.save_screenshot(screen_shot_file_path)
 
-        # スクリーンショットを取って保存
-        driver.save_screenshot(screen_shot_file_path)
+            end_time = time.time()  # テストの終了時間を記録
+            elapsed_time = end_time - start_time  # テストの実行時間を計算
+            print(f"{browser} session {session_number} Test elapsed time: {elapsed_time} seconds")
 
-        end_time = time.time()  # テストの終了時間を記録
-        elapsed_time = end_time - start_time  # テストの実行時間を計算
-        print(f"{browser} session {session_number} Test elapsed time: {elapsed_time} seconds")
+            driver.quit()
 
-        driver.quit()
-
-    except WebDriverException as e:
-        print(f"Error with {browser} session {session_number}: {e}")
-        elapsed_time = None
+        except WebDriverException as e:
+            print(f"Error with {browser} session {session_number}: {e}")
+            elapsed_time = None
 
     return elapsed_time  # テストの実行時間を返す
 

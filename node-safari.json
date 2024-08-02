@@ -1,9 +1,0 @@
-{
-    "capabilities": [
-      {
-        "browserName": "safari",
-        "maxInstances": 4
-      }
-    ],
-    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy"
-  }

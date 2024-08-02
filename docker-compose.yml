@@ -3,7 +3,7 @@ services:
   chrome:
     platform: linux/x86_64
     image: selenium/node-chrome:beta
-    shm_size: 4gb
+    shm_size: 2gb
     depends_on:
       - selenium-hub
     environment:
@@ -16,7 +16,7 @@ services:
   edge:
     platform: linux/x86_64
     image: selenium/node-edge:beta
-    shm_size: 4gb
+    shm_size: 2gb
     depends_on:
       - selenium-hub
     environment:
