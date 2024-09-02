@@ -1,9 +1,14 @@
 from selenium import webdriver
 from concurrent import futures
 import time
+import os
 
 def test(browser):
     screen_shot_file_path = f'/home/pybatch/python/inout/screen_shot_{browser}.png'
+
+    # 指定したディレクトリが存在しない場合は作成する
+    if not os.path.exists(screen_shot_file_path):
+        os.makedirs(screen_shot_file_path)
 
     if browser == 'chrome':
         options = webdriver.ChromeOptions()
