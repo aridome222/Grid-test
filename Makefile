@@ -1,11 +1,14 @@
 clean:
-	cd /Users/naoki_mac/workspace/research/Grid-test/python/inout && find . -type f -delete
+	cd ./python/inout && find . -type f -delete
 
 build:
+	docker-compose stop && docker-compose build && docker-compose up -d
+
+up:
 	docker-compose stop && docker-compose up -d
 
 run:
-	@SCRIPT_PATH="bin/test-serenium.py"; \
+	@SCRIPT_PATH="bin/test-selenium_html.py"; \
 	CONTAINER_NAME="selenium-python-container"; \
 	docker exec -it "$$CONTAINER_NAME" /bin/bash -c "python3 $$SCRIPT_PATH"
 
