@@ -11,7 +11,7 @@ RUN groupadd -g 61000 batch && \
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install selenium
+    && pip install selenium && pip install requests
 
 RUN mkdir /home/pybatch/bin
 

@@ -8,7 +8,7 @@ up:
 	docker-compose stop && docker-compose up -d
 
 run:
-	@SCRIPT_PATH="bin/test-selenium_html.py"; \
+	@SCRIPT_PATH="bin/test-selenium.py"; \
 	CONTAINER_NAME="selenium-python-container"; \
 	docker exec -it "$$CONTAINER_NAME" /bin/bash -c "python3 $$SCRIPT_PATH"
 

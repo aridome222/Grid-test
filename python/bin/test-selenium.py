@@ -1,10 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
 from concurrent import futures
 import time
-from selenium.common.exceptions import WebDriverException
 import os
 from enum import Enum
+
+from cmd_runner import CommandRunner
 
 # ブラウザを列挙体で定義
 class Browser(Enum):
@@ -14,70 +16,98 @@ class Browser(Enum):
     SAFARI = 'safari'
 
 # テストで使用するブラウザのリストを一箇所にまとめて定義
-BROWSERS_TO_TEST = [Browser.CHROME, Browser.FIREFOX, Browser.EDGE]
+BROWSERS_TO_TEST = [Browser.CHROME, Browser.FIREFOX, Browser.EDGE, Browser.SAFARI]
 
 # BROWSERS_TO_TESTの長さに基づいてBROWSER_NUMBERを設定
 BROWSER_NUMBER = len(BROWSERS_TO_TEST)
 SESSION_NUMBER = 1
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
-def test(browser, session_number):
-    screen_shot_file_path = f'/home/pybatch/python/inout/screen_shot_{browser.name}_{session_number}.png'
-    img_directory = os.path.dirname(screen_shot_file_path)
-    # 指定したディレクトリが存在しない場合は作成する
-    if not os.path.exists(img_directory):
-        os.makedirs(img_directory)
+URL = 'https://earth.cs.miyazaki-u.ac.jp/'
 
-    if browser == Browser.CHROME:
-        options = webdriver.ChromeOptions()
-        # options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--headless')  # ヘッドレスモードで実行
-    elif browser == Browser.FIREFOX:
-        options = webdriver.FirefoxOptions()
-        # options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--headless')  # ヘッドレスモードで実行
-    elif browser == Browser.EDGE:
-        options = webdriver.EdgeOptions()
-        # options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--headless')  # ヘッドレスモードで実行
-    elif browser == Browser.SAFARI:
-        SafariDriver = webdriver.Safari()
+def test(browser, session_number):
+    # SafariDriverかそれ以外かを判定
+    if browser == Browser.SAFARI:
+        # スクリーンショットの保存先を定義
+        screen_shot_file_path = f'./python/inout/screen_shot_{browser.name}_{session_number}.png'
+        # HTMLコードの保存先を定義
+        html_file_path = f'./python/inout/page_source_{browser.name}_{session_number}.html'
+
+        # スクリーンショット画像とHTMLコードの取得
+        print(f"{browser.name} session {session_number}", URL)
+        start_time = time.time()  # テストの開始時間を記録
+
+        runner = CommandRunner("http://host.docker.internal:5001/run-command")
+        output = runner.run_command("python3 ./python/bin/test-safari.py")
+
+        """ TODO: エラーの場合の処理 """
+        # if output == "error":
+        #     print(f"Error with {browser.name} session {session_number}: {output}")
+        #     elapsed_time = None
+        
+        """ 今はハードコーディングだけど、今後スクショに関する情報をローカルサーバ上に送信できるようにする """
+        # # ウィンドウのサイズ設定
+        # SafariDriver.maximize_window()
+        # # アクセスするURL
+        # SafariDriver.get('https://earth.cs.miyazaki-u.ac.jp/')
+        # # スクリーンショットを保存
+        # SafariDriver.save_screenshot(screen_shot_file_path)  
+        # # HTMLコードを保存
+        # with open(html_file_path, 'w', encoding='utf-8') as f:
+        #     f.write(SafariDriver.page_source)
+
+        """ 今は同期処理。今後、非同期処理にしたい。 """
+        time.sleep(2)  # 長い処理
+
+        end_time = time.time()  # テストの終了時間を記録
+        elapsed_time = end_time - start_time  # テストの実行時間を計算
+        print(f"{browser.name} session {session_number} Test elapsed time: {elapsed_time} seconds")
     else:
-        raise ValueError("Invalid browser specified")
-    
-    # Safariの場合は上記で既にdriverが作成されているので、以下の行は不要
-    if browser != Browser.SAFARI:
+        # スクリーンショットの保存先を定義
+        screen_shot_file_path = f'/home/pybatch/python/inout/screen_shot_{browser.name}_{session_number}.png'
+        # HTMLコードの保存先を定義
+        html_file_path = f'/home/pybatch/python/inout/page_source_{browser.name}_{session_number}.html'
+        
+        # スクリーンショット画像とHTMLコードを保存するディレクトリのパス
+        img_directory = os.path.dirname(screen_shot_file_path)
+        # 指定したディレクトリが存在しない場合は作成する
+        if not os.path.exists(img_directory):
+            os.makedirs(img_directory)
+
+        # RemoteWebDriverの設定
+        if browser == Browser.CHROME:
+            options = webdriver.ChromeOptions()
+            options.add_argument('--no-sandbox')
+            options.add_argument('--headless')  # ヘッドレスモードで実行
+        elif browser == Browser.FIREFOX:
+            options = webdriver.FirefoxOptions()
+            options.add_argument('--no-sandbox')
+            options.add_argument('--headless')  # ヘッドレスモードで実行
+        elif browser == Browser.EDGE:
+            options = webdriver.EdgeOptions()
+            options.add_argument('--no-sandbox')
+            options.add_argument('--headless')  # ヘッドレスモードで実行
+        else:
+            raise ValueError("Invalid browser specified")
+        
         driver = webdriver.Remote(
             command_executor='http://selenium-hub:4444/wd/hub',
             options=options
         )
-        
-    if browser == Browser.SAFARI:
+
+        # スクリーンショット画像とHTMLコードの取得
         try:
-            print(f"{browser.name} session {session_number}")
-            SafariDriver.maximize_window()
-            start_time = time.time()  # テストの開始時間を記録
-            SafariDriver.get('https://www.yahoo.co.jp/')
-            time.sleep(0.5)
-            SafariDriver.save_screenshot(screen_shot_file_path)
-            end_time = time.time()  # テストの終了時間を記録
-            elapsed_time = end_time - start_time  # テストの実行時間を計算
-            print(f"{browser.name} session {session_number} Test elapsed time: {elapsed_time} seconds")
-            SafariDriver.quit()
-        except WebDriverException as e:
-            print(f"Error with {browser.name} session {session_number}: {e}")
-            elapsed_time = None
-    else:
-        try:
-            driver.get('https://www.yahoo.co.jp/')
+            driver.get(URL)
             print(f"{browser.name} session {session_number}", driver.current_url)
 
             start_time = time.time()  # テストの開始時間を記録
 
+            # スクリーンショットを保存
             driver.save_screenshot(screen_shot_file_path)
+            
+            # HTMLコードを保存
+            with open(html_file_path, 'w', encoding='utf-8') as f:
+                f.write(driver.page_source)
 
             end_time = time.time()  # テストの終了時間を記録
             elapsed_time = end_time - start_time  # テストの実行時間を計算
