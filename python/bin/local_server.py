@@ -11,6 +11,7 @@ def run_command():
 
     # コマンドをローカルで実行し、結果を返す
     try:
+        # コマンドをシェルで実行
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         return jsonify({"output": result.stdout, "error": result.stderr})
     except Exception as e:
