@@ -5,7 +5,7 @@ build:
 	docker-compose stop && docker-compose build && docker-compose up -d
 
 up:
-	docker-compose stop && docker-compose up -d
+	docker-compose stop && docker-compose up -d && python3 python/bin/local_server.py
 
 run:
 	@SCRIPT_PATH="bin/test-selenium.py"; \
