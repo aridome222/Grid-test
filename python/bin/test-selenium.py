@@ -28,8 +28,8 @@ BROWSER_NUMBER = len(BROWSERS_TO_TEST)
 SESSION_NUMBER = 1
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
-URL = 'https://earth.cs.miyazaki-u.ac.jp/'
-# URL="http://host.docker.internal:5000/before"
+# URL = 'https://earth.cs.miyazaki-u.ac.jp/'
+URL="http://host.docker.internal:5000/before"
 
 def test(browser, session_number):
     # SafariDriverかそれ以外かを判定
@@ -38,6 +38,12 @@ def test(browser, session_number):
         screen_shot_file_path = f'./python/inout/screen_shot_{browser.name}_{session_number}.png'
         # HTMLコードの保存先を定義
         html_file_path = f'./python/inout/page_source_{browser.name}_{session_number}.html'
+        
+        # スクリーンショット画像とHTMLコードを保存するディレクトリのパス
+        img_directory = os.path.dirname(screen_shot_file_path)
+        # 指定したディレクトリが存在しない場合は作成する
+        if not os.path.exists(img_directory):
+            os.makedirs(img_directory)
 
         # スクリーンショット画像とHTMLコードの取得
         print(f"{browser.name} session {session_number}", URL)
