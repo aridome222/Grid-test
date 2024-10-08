@@ -15,6 +15,7 @@ def run_test(screen_shot_file_path, html_file_path, URL):
     try:
         # Safariドライバを起動
         SafariDriver = webdriver.Safari()
+        # SafariDriver.maximize_window()
 
         # 指定されたURLにアクセス
         SafariDriver.get(url)
@@ -28,9 +29,19 @@ def run_test(screen_shot_file_path, html_file_path, URL):
             print(f"Timeout occurred while waiting for page to load: {e}")
 
         # ウィンドウサイズをWebページのサイズに合わせる
-        width = SafariDriver.execute_script("return document.body.scrollWidth;")
-        height = SafariDriver.execute_script("return document.body.scrollHeight;")
-        SafariDriver.set_window_size(width, height)
+        # width = SafariDriver.execute_script("return document.body.scrollWidth;")
+        # height = SafariDriver.execute_script("return document.body.scrollHeight;")
+        # width = SafariDriver.execute_script("return Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);")
+        # height = SafariDriver.execute_script("return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);")
+        # SafariDriver.set_window_size(width, height)
+        
+        # devicePixelRatioを考慮したウィンドウサイズを計算
+        device_pixel_ratio = SafariDriver.execute_script("return window.devicePixelRatio;")
+        width = SafariDriver.execute_script("return Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);")
+        height = SafariDriver.execute_script("return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);")
+
+        # ウィンドウサイズにデバイスピクセル比を掛ける
+        SafariDriver.set_window_size(width * device_pixel_ratio, height * device_pixel_ratio)
 
         # スクリーンショットの取得
         ob = Screenshot.Screenshot()

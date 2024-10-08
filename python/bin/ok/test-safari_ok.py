@@ -6,6 +6,8 @@ import time
 screen_shot_file_path = './python/inout/screen_shot_SAFARI_1.png'
 html_file_path = f'./python/inout/page_source_SAFARI_1.html'
 
+# URL="https://earth.cs.miyazaki-u.ac.jp/"
+URL="http://localhost:5000/before"
 
 try:
     #Safariドライバ起動
@@ -13,7 +15,7 @@ try:
     SafariDriver.maximize_window()
 
     # アクセスするURL
-    SafariDriver.get('https://earth.cs.miyazaki-u.ac.jp/')
+    SafariDriver.get(URL)
 
     time.sleep(1)  # 長い処理
 

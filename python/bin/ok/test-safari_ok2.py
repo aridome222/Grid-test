@@ -16,7 +16,7 @@ URL="http://localhost:5000/before"
 try:
     #Safariドライバ起動
     SafariDriver = webdriver.Safari()
-    # SafariDriver.maximize_window()
+    SafariDriver.maximize_window()
 
     # アクセスするURL
     SafariDriver.get(URL)
@@ -24,12 +24,15 @@ try:
     time.sleep(1)  # 長い処理
 
     # スクリーンaショットを撮る
-
     ob = Screenshot.Screenshot()
 
     #ウインドウサイズをWebサイトに合わせて変更
-    width = SafariDriver.execute_script("return document.body.scrollWidth;")
-    height = SafariDriver.execute_script("return document.body.scrollHeight;")
+    # width = SafariDriver.execute_script("return document.body.scrollWidth;")
+    # height = SafariDriver.execute_script("return document.body.scrollHeight;")
+    # width = 1600
+    # height = 4234
+    width = SafariDriver.execute_script("return Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);")
+    height = SafariDriver.execute_script("return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);")
     SafariDriver.set_window_size(width,height)
 
     # タイムアウト判定を行う
