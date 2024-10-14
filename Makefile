@@ -7,8 +7,8 @@ build:
 up:
 	docker-compose stop && docker-compose up -d && python3 python/bin/local_server.py
 
-run: clean mkdir
-	@SCRIPT_PATH="bin/test-selenium.py"; \
+run: mkdir clean
+	@SCRIPT_PATH="bin/test-selenium_safari.py"; \
 	CONTAINER_NAME="selenium-python-container"; \
 	docker exec -it "$$CONTAINER_NAME" /bin/bash -c "python3 $$SCRIPT_PATH"
 
