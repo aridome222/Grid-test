@@ -1,3 +1,4 @@
 *.png
 *inout
 *.pyc
+*.DS_Store
