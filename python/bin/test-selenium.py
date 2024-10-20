@@ -106,10 +106,33 @@ def test(browser, session_number):
             height = driver.execute_script("return document.body.scrollHeight;")
             driver.set_window_size(width,height)
 
-            # タイムアウト判定を行う
+            # ミューテーションで動的要素を監視、変化が一定期間なければ終了とみなす
+            def wait_for_dom_stable(driver, timeout=30):
+                script = """
+                return new Promise(function(resolve, reject) {
+                    let observer = new MutationObserver(function(mutations) {
+                        clearTimeout(timeoutId);
+                        timeoutId = setTimeout(() => {
+                            observer.disconnect();
+                            resolve(true);
+                        }, 500); // DOMの変化が500ms間ない場合に終了と見なす
+                    });
+
+                    let timeoutId = setTimeout(() => {
+                        observer.disconnect();
+                        resolve(false); // タイムアウト
+                    }, %d);
+
+                    observer.observe(document, {subtree: true, childList: true});
+                });
+                """ % (timeout * 1000)
+
+                return driver.execute_script(script)
+
             try:
-                # 全てのコンテンツが読み込まれるまで待機
-                WebDriverWait(driver, 15).until(EC.presence_of_all_elements_located)
+                result = wait_for_dom_stable(driver, timeout=30)
+                if not result:
+                    print("DOMが安定するのを待っている間にタイムアウトしました")
             except TimeoutException as e:
                 # 例外処理
                 print(e)
