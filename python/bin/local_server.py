@@ -1,3 +1,6 @@
+# safariで画像取得するためのローカルサーバ
+# Dockerから送られてきたコマンドをローカル上で実行する
+# ポートは、自作ページで5000ポートを使っているため、5001にしている
 from flask import Flask, request, jsonify
 import subprocess
 

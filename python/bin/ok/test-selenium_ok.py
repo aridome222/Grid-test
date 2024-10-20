@@ -1,3 +1,5 @@
+# safariでの画像取得で必要な保存パスやurl情報をサーバに送りつけて画像取得できたやつ
+# 自作ページにおいてはすべてのブラウザでフルページ取れているが、研究室ページだとChromeなどで正しくフルページ取れない
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
@@ -5,6 +7,11 @@ from concurrent import futures
 import time
 import os
 from enum import Enum
+
+from Screenshot import Screenshot
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from cmd_runner import CommandRunner
 
@@ -23,7 +30,8 @@ BROWSER_NUMBER = len(BROWSERS_TO_TEST)
 SESSION_NUMBER = 1
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
-URL = 'https://earth.cs.miyazaki-u.ac.jp/'
+# URL = 'https://earth.cs.miyazaki-u.ac.jp/'
+URL="http://host.docker.internal:5000/before"
 
 def test(browser, session_number):
     # SafariDriverかそれ以外かを判定
@@ -32,32 +40,23 @@ def test(browser, session_number):
         screen_shot_file_path = f'./python/inout/screen_shot_{browser.name}_{session_number}.png'
         # HTMLコードの保存先を定義
         html_file_path = f'./python/inout/page_source_{browser.name}_{session_number}.html'
+        
+        # スクリーンショット画像とHTMLコードを保存するディレクトリのパス
+        img_directory = os.path.dirname(screen_shot_file_path)
+        # 指定したディレクトリが存在しない場合は作成する
+        if not os.path.exists(img_directory):
+            os.makedirs(img_directory)
 
         # スクリーンショット画像とHTMLコードの取得
         print(f"{browser.name} session {session_number}", URL)
         start_time = time.time()  # テストの開始時間を記録
 
+        # CommandRunnerを使用してサーバにリクエストを送信
         runner = CommandRunner("http://host.docker.internal:5001/run-command")
-        output = runner.run_command("python3 ./python/bin/test-safari.py")
-
-        """ TODO: エラーの場合の処理 """
-        # if output == "error":
-        #     print(f"Error with {browser.name} session {session_number}: {output}")
-        #     elapsed_time = None
-        
-        """ 今はハードコーディングだけど、今後スクショに関する情報をローカルサーバ上に送信できるようにする """
-        # # ウィンドウのサイズ設定
-        # SafariDriver.maximize_window()
-        # # アクセスするURL
-        # SafariDriver.get('https://earth.cs.miyazaki-u.ac.jp/')
-        # # スクリーンショットを保存
-        # SafariDriver.save_screenshot(screen_shot_file_path)  
-        # # HTMLコードを保存
-        # with open(html_file_path, 'w', encoding='utf-8') as f:
-        #     f.write(SafariDriver.page_source)
-
-        """ 今は同期処理。今後、非同期処理にしたい。 """
-        # time.sleep(1)  # 長い処理
+        # コマンドと引数を渡す
+        command = f"python3 ./python/bin/test-safari.py {screen_shot_file_path} {html_file_path} {URL}"
+        output = runner.run_command(command)
+        print(output)  # サーバからの出力を確認
 
         end_time = time.time()  # テストの終了時間を記録
         elapsed_time = end_time - start_time  # テストの実行時間を計算
@@ -102,8 +101,25 @@ def test(browser, session_number):
 
             start_time = time.time()  # テストの開始時間を記録
 
-            # スクリーンショットを保存
-            driver.save_screenshot(screen_shot_file_path)
+            ob = Screenshot.Screenshot()
+
+            #ウインドウサイズをWebサイトに合わせて変更
+            width = driver.execute_script("return document.body.scrollWidth;")
+            height = driver.execute_script("return document.body.scrollHeight;")
+            driver.set_window_size(width,height)
+
+            # タイムアウト判定を行う
+            try:
+                # 全てのコンテンツが読み込まれるまで待機
+                WebDriverWait(driver, 15).until(EC.presence_of_all_elements_located)
+            except TimeoutException as e:
+                # 例外処理
+                print(e)
+
+            # 追加: ここでフルページのスクリーンショットを取る  
+            ob.full_screenshot(driver, save_path="/home/pybatch/python/inout/", image_name=f"screen_shot_{browser.name}_{session_number}.png") 
+            # ob.full_screenshot(driver, save_path=output_dir, image_name=output_file_name, is_load_at_runtime = True, load_wait_time=10) 
+
             
             # HTMLコードを保存
             with open(html_file_path, 'w', encoding='utf-8') as f:

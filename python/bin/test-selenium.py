@@ -1,3 +1,6 @@
+# 異なるブラウザでスクリーンショットを実行する処理部
+# 現状、幅と高さを固定しないとフルページ取れない
+# また、大きく幅と高さをとると、白い部分が発生する
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
@@ -28,8 +31,14 @@ BROWSER_NUMBER = len(BROWSERS_TO_TEST)
 SESSION_NUMBER = 1
 TOTAL_SESSION_NUMBER = BROWSER_NUMBER * SESSION_NUMBER
 
-# URL = 'https://earth.cs.miyazaki-u.ac.jp/'
-URL="http://host.docker.internal:5000/before"
+# # Chromeの画像取得時のWebページの高さに合わせる
+# WIDTH = 0
+# HEIGHT = 0
+# ROOP = False
+
+URL = 'https://earth.cs.miyazaki-u.ac.jp/'
+# URL="http://host.docker.internal:5000/before"
+# URL="http://host.docker.internal:5000/after"
 
 def test(browser, session_number):
     # SafariDriverかそれ以外かを判定
@@ -99,11 +108,26 @@ def test(browser, session_number):
 
             start_time = time.time()  # テストの開始時間を記録
 
-            ob = Screenshot.Screenshot()
+            time.sleep(1)  # 長い処理
+
+            # ob = Screenshot.Screenshot()
 
             #ウインドウサイズをWebサイトに合わせて変更
+            # if ROOP == False:
+            #     width = driver.execute_script("return document.body.scrollWidth;")
+            #     height = driver.execute_script("return document.body.scrollHeight;")
+            #     WIDTH = width
+            #     HEIGHT = height
+            #     ROOP == True
+                
+            # width = 800
+            # height = 2117
             width = driver.execute_script("return document.body.scrollWidth;")
             height = driver.execute_script("return document.body.scrollHeight;")
+            width = 800
+            height = 2500
+            print(height)
+            print(width)
             driver.set_window_size(width,height)
 
             # ミューテーションで動的要素を監視、変化が一定期間なければ終了とみなす
@@ -134,12 +158,14 @@ def test(browser, session_number):
                 if not result:
                     print("DOMが安定するのを待っている間にタイムアウトしました")
             except TimeoutException as e:
-                # 例外処理
-                print(e)
+                print("例外が発生しました: ", e)
 
             # 追加: ここでフルページのスクリーンショットを取る  
-            ob.full_screenshot(driver, save_path="/home/pybatch/python/inout/", image_name=f"screen_shot_{browser.name}_{session_number}.png") 
+            # ob.full_screenshot(driver, save_path="/home/pybatch/python/inout/", image_name=f"screen_shot_{browser.name}_{session_number}.png") 
             # ob.full_screenshot(driver, save_path=output_dir, image_name=output_file_name, is_load_at_runtime = True, load_wait_time=10) 
+            # スクリーンaショットを撮る
+            # time.sleep(3) 
+            driver.save_screenshot(screen_shot_file_path)
 
             
             # HTMLコードを保存

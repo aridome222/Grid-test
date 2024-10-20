@@ -1,9 +1,7 @@
-# 初めてsafariでスクリーンショット画像が撮れた時のやつ
+# 幅800固定で、自作ページをフルページで取れたやつ、ただし、既に変更前ページで不具合発生
+# 一応、研究室ページもフルで取れたが、余分に縦に長く撮りすぎて白い部分ができてしまっている
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
 
@@ -17,27 +15,24 @@ try:
     #Safariドライバ起動
     SafariDriver = webdriver.Safari()
     SafariDriver.maximize_window()
+    # 最大化されたウィンドウのサイズを取得
+    window_size = SafariDriver.get_window_size()
+
+    # 最大化されたウィンドウの高さを取得
+    height = window_size['height']
+
+    height = SafariDriver.execute_script("return document.body.scrollHeight")
+
+    # 幅を指定
+    width = 800
+    # width = SafariDriver.execute_script("return document.body.scrollWidth")
+
+
+    # 高さは最大化した状態のものを使ってウィンドウサイズを変更
+    SafariDriver.set_window_size(width, height*2)
 
     # アクセスするURL
     SafariDriver.get(URL)
-
-    time.sleep(1)  # 長い処理
-
-    # device_pixel_ratio = SafariDriver.execute_script("return window.devicePixelRatio;")
-
-    # 高さを指定
-    # height = SafariDriver.execute_script("return document.body.scrollHeight")
-    height = SafariDriver.execute_script("return document.documentElement.scrollHeight")
-
-    # 幅を指定
-    width = SafariDriver.execute_script("return document.body.scrollWidth")
-    # width = SafariDriver.execute_script("return document.documentElement.scrollWidth")
-
-    print(height)
-    print(width)
-
-    # 高さは最大化した状態のものを使ってウィンドウサイズを変更
-    SafariDriver.set_window_size(width, height)
 
     time.sleep(1)  # 長い処理
 
